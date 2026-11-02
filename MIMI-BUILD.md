@@ -5,15 +5,14 @@
 
 ## 版本规则(重要)
 
-- **Cargo/workspace 版本和 tag 保持官方样式 `0.10.2`(不带横杠后缀)。**
-  `release.yml` 规定:tag 含 `-` 时不真实编译,改走"复用 nightly"路线 —— 所以
-  `v0.10.2-mimi.1` 这种 tag 不会产出新二进制。
-- 本地构建的区分靠**显示层后缀**:所有用户可见版本串显示为 `0.10.2-mimi.1`。
-  改后缀版本时动这 3 处(搜 `-mimi.1`):
-  1. `crates/pa-cli/src/config.rs` → `fn version()` 末尾 `format!("{base}-mimi.1")`
-  2. `crates/pa-daemon/src/protocol.rs` → `DAEMON_APP_VERSION` 的 `concat!`
-  3. `crates/pa-tui/src/session_ui/lifecycle.rs` → 重连横幅里的 `concat!`
-  (更新检查、upload、build_id 故意保持官方版本号,便于和上游 release 比较。)
+- **Cargo/workspace 版本、tag、`--version` 输出全部保持官方样式 `0.10.2`。**
+  两个硬约束:`release.yml` 规定 tag 含 `-` 不真实编译;构建后有 "Livecheck gate"
+  断言 `--version` 严格等于 tag 版本(本仓 token 无 workflow scope,改不了门禁)。
+- fork 的区分标识在 **TUI 标题栏**:`chrome.rs` 显示 `v0.10.2-mimi.1`。
+  改后缀版本只动一处(搜 `-mimi.1`):
+  `crates/pa-tui/src/chrome.rs` → `let version = format!("v{}-mimi.1", ...)`
+  (更新检查、握手、build_id 保持官方版本号,便于和上游 release 比较,也避免
+  版本协商误报。)
 
 ## 合并流程(以下次 0.10.3 为例)
 

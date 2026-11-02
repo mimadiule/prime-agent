@@ -50,14 +50,9 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// executable wins, falling back to the compiled-in version.
 pub fn version() -> &'static str {
     static VERSION: std::sync::OnceLock<String> = std::sync::OnceLock::new();
-    VERSION.get_or_init(|| {
-        let base = match packaged_manifest_version() {
-            Some(version) => version,
-            None => crate::config::VERSION.to_string(),
-        };
-        // mimi fork build: mark every user-visible version string so local
-        // builds are distinguishable from official releases.
-        format!("{base}-mimi.1")
+    VERSION.get_or_init(|| match packaged_manifest_version() {
+        Some(version) => version,
+        None => crate::config::VERSION.to_string(),
     })
 }
 

@@ -8,8 +8,9 @@ recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prim
 个人自用构建:基座为上游 main(即 v0.10.2 + 已合并修复,含 #3755 Windows 多行粘贴
 修复),另以 squash 方式合入以下 8 个开放 PR。由 tag `v0.10.2` 触发 release 工作流
 构建,产物挂在该次 run 的 artifact 中。重建步骤见 [MIMI-BUILD.md](MIMI-BUILD.md)。
-Cargo 版本与 tag 保持官方样式;所有用户可见版本串追加 `-mimi.1` 后缀以便区分
-(pa-cli `version()` / pa-daemon `DAEMON_APP_VERSION` / pa-tui 重连横幅三处)。
+Cargo 版本、tag、`--version` 保持官方样式(release 工作流的 livecheck 门禁要求
+`--version` 严格等于 tag);fork 标识显示在 **TUI 标题栏**:`v0.10.2-mimi.1`
+(pa-tui `chrome.rs` 一处)。
 
 - #3769 feat(rlm): rlm.session.messages — 模型可从 Python 读取自己的会话转录。
 - #3867 agents view: Ctrl+F 搜索已保存会话的消息文本。
