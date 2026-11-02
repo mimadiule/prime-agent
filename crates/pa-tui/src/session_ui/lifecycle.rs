@@ -303,7 +303,7 @@ impl SessionUi {
                     .map(str::to_string);
                 let (text, status_kind) = crate::daemon_reconnect::reconnect_banner(
                     daemon_version.as_deref(),
-                    env!("CARGO_PKG_VERSION"),
+                    concat!(env!("CARGO_PKG_VERSION"), "-mimi.1"),
                 );
                 view.push_entry(crate::chat::ChatEntry::Status {
                     text,

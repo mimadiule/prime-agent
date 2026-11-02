@@ -19,7 +19,7 @@ use serde_json::Value;
 pub const DAEMON_COMMAND_ENVELOPE_MIN_PROTOCOL_VERSION: u64 = DAEMON_PROTOCOL_VERSION;
 /// Compiled product-version fallback for library embedders. Packaged CLI
 /// processes initialize the reported version through [`configure_app_version`].
-pub const DAEMON_APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const DAEMON_APP_VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "-mimi.1");
 
 static PRODUCT_VERSION: std::sync::OnceLock<&'static str> = std::sync::OnceLock::new();
 
