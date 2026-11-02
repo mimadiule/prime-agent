@@ -376,7 +376,7 @@ pub fn render_splash(state: &ChromeState, theme: &Theme, width: usize) -> Vec<Li
     let muted = theme.fg_style(ThemeColor::Muted);
     let dim = theme.fg_style(ThemeColor::Dim);
     let title = "prime agent";
-    let version = format!("v{}-mimi.1", state.version); // mimi fork marker; --version stays tag-exact (release livecheck gate)
+    let version = format!("v{}-mimi.2", state.version); // mimi fork marker; --version stays tag-exact (release livecheck gate)
     let mut meta_lines: Vec<Line> = Vec::new();
     if str_width(&format!("{title} {version}")) <= meta_width {
         meta_lines.push(vec![

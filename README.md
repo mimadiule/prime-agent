@@ -31,7 +31,7 @@ Prime Agent: A Self-Improving RLM Harness
 > **mimi 自用构建(0.10.2-mimi.1,非官方)** —— 本分支在官方 v0.10.2 的 main 基础上,
 > 已包含 #3755(Windows 多行粘贴合并修复),另合入 8 个开放 PR:
 > #3183 · #3888 · #3825 · #3867 · #3792 · #3769 · #3847 · #3872。
-> TUI 标题栏显示 `v0.10.2-mimi.1`,可与官方版一眼区分(`--version` 受 CI 门禁保持 `0.10.2`)。
+> TUI 标题栏显示 `v0.10.2-mimi.2`,可与官方版一眼区分(`--version` 受 CI 门禁保持 `0.10.2`)。
 > 明细见 [CHANGELOG.md](CHANGELOG.md);重建步骤见 [MIMI-BUILD.md](MIMI-BUILD.md)。
 
 <p align="center">

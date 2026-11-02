@@ -8,9 +8,9 @@
 - **Cargo/workspace 版本、tag、`--version` 输出全部保持官方样式 `0.10.2`。**
   两个硬约束:`release.yml` 规定 tag 含 `-` 不真实编译;构建后有 "Livecheck gate"
   断言 `--version` 严格等于 tag 版本(本仓 token 无 workflow scope,改不了门禁)。
-- fork 的区分标识在 **TUI 标题栏**:`chrome.rs` 显示 `v0.10.2-mimi.1`。
-  改后缀版本只动一处(搜 `-mimi.1`):
-  `crates/pa-tui/src/chrome.rs` → `let version = format!("v{}-mimi.1", ...)`
+- fork 的区分标识在 **TUI 标题栏**:`chrome.rs` 显示 `v0.10.2-mimi.N`。
+  升后缀版本只动一处(搜 `-mimi.`):
+  `crates/pa-tui/src/chrome.rs` → `let version = format!("v{}-mimi.2", ...)`
   (更新检查、握手、build_id 保持官方版本号,便于和上游 release 比较,也避免
   版本协商误报。)
 

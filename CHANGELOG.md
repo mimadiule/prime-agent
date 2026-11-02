@@ -3,6 +3,11 @@
 Release notes for Prime Agent. Historical TypeScript release notes are
 recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prime-agent/blob/v0.9.8/packages/coding-agent/CHANGELOG.md).
 
+## [0.10.2-mimi.2] - 2026-11-02 (unofficial fork build)
+
+- Fixed: pasted CJK text arrived as GBK mojibake. ConPTY decodes the terminal's pasted input bytes per the client's console input codepage (936 on Chinese Windows), and the app never pinned it. `console_init` now pins both console codepages to UTF-8 (65001) for the process and hands the originals back on restore (`pa-types/src/platform/windows_console.rs`).
+- TUI title-bar marker bumped to `v0.10.2-mimi.2` (follow-up build for the paste fix; no new upstream PRs).
+
 ## [0.10.2-mimi.1] - 2026-11-02 (unofficial fork build)
 
 个人自用构建:基座为上游 main(即 v0.10.2 + 已合并修复,含 #3755 Windows 多行粘贴
