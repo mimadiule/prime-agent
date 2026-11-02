@@ -3,6 +3,24 @@
 Release notes for Prime Agent. Historical TypeScript release notes are
 recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prime-agent/blob/v0.9.8/packages/coding-agent/CHANGELOG.md).
 
+## [0.10.2-mimi.1] - 2026-11-02 (unofficial fork build)
+
+个人自用构建:基座为上游 main(即 v0.10.2 + 已合并修复,含 #3755 Windows 多行粘贴
+修复),另以 squash 方式合入以下 8 个开放 PR。由 tag `v0.10.2` 触发 release 工作流
+构建,产物挂在该次 run 的 artifact 中。
+
+- #3769 feat(rlm): rlm.session.messages — 模型可从 Python 读取自己的会话转录。
+- #3867 agents view: Ctrl+F 搜索已保存会话的消息文本。
+- #3792 worker: 相邻排队通知合并为一个回合;customMessage 在入口处拒绝无法持久化的投递。
+- #3888 fix(tui): 会话挂起后恢复时,转录视图继续跟随新输出。
+- #3825 tui: emoji 选择器仅在确认时插入,而非预览即插入。
+- #3183 被修改实体的 id 保留全部修饰符信息。
+- #3847 fix: 内核仍持有活跃用户 asyncio 任务时,不在 park / 空闲钝化时回收。
+- #3872 agent_engine: 尊重在回合注册前到达的中止请求。
+
+未合入(与基线冲突,多为依赖其他未合并 PR 的堆叠分支):#3201 #3311 #3829 #2530
+#3615 #3354 #3589 #3328 #3863 #2451 #1146 #3411。
+
 ## [0.10.2] - 2026-10-28
 
 - The static usage layer no longer tells agents to await commands before ending the turn: since #3580 daemonless sessions also wake on a queued `[bash-done]` turn, every session kind has completion notifications, and the no-polling rule (end the turn and collect the result on the done notification) is the one turn-end contract.

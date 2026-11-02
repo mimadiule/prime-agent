@@ -27,6 +27,12 @@ Prime Agent: A Self-Improving RLM Harness
   </a>
 </p>
 
+> [!NOTE]
+> **mimi 自用构建(0.10.2-mimi.1,非官方)** —— 本分支在官方 v0.10.2 的 main 基础上,
+> 已包含 #3755(Windows 多行粘贴合并修复),另合入 8 个开放 PR:
+> #3183 · #3888 · #3825 · #3867 · #3792 · #3769 · #3847 · #3872。
+> 明细见 [CHANGELOG.md](CHANGELOG.md);由 tag `v0.10.2` 触发 GitHub Actions 构建。
+
 <p align="center">
   <a href="https://trendshift.io/repositories/104249?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-104249" target="_blank" rel="noopener noreferrer">
     <img src="https://trendshift.io/api/badge/repositories/104249" alt="PrimeIntellect-ai%2Fprime-agent | Trendshift" width="250" height="55" />
