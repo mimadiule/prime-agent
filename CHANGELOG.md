@@ -3,6 +3,15 @@
 Release notes for Prime Agent. Historical TypeScript release notes are
 recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prime-agent/blob/v0.9.8/packages/coding-agent/CHANGELOG.md).
 
+## [0.10.3-mimi.1] - 2026-11-13
+
+个人 fork 构建(基座:官方 v0.10.3)。官方 release 之外的变化:
+
+- 合入上游未收编的 PR:#3867(agents 视图 Ctrl+F 会话内容搜索)、#3792(worker 拒绝无法持久化的 customMessage 投递)、#3183(实体 id 修饰符)、#3872(回合开始前落地的 abort 立即生效)。
+- mimi 专项保留:Windows 粘贴中文乱码修复 —— `console_init` 钉定 UTF-8 代码页(65001),`console_restore` 还原(`pa-types/src/platform/windows_console.rs`)。
+- fork 标识:TUI 标题栏显示 `v0.10.3-mimi.1`;`--version` 保持 `0.10.3`(livecheck 门禁)。
+- 相对 0.10.2-mimi.2:#3769、#3888、#3829 已随官方 v0.10.3 收编,#3825 已被官方合并(随 v0.10.4 发布),均不再手工维护;#3847(内核驻留)上游已用新架构重实现其核心(见 MIMI-BUILD.md),asyncio 级扩展放弃。
+
 ## [0.10.3] - 2026-11-11
 
 - Concurrent OAuth credential lookups now keep the refresh flight reserved until the refreshed credential is committed and reloaded, preventing a second lookup from reusing the expired refresh token between fetch and persistence.

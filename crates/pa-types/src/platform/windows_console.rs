@@ -1,8 +1,11 @@
 //! Enable VT processing before the TUI's raw ANSI mode writes, restoring
-//! only the bit this module added on exit. Redirected stdout is untouched.
-//! Rust std provides console-aware Unicode I/O;
-//! changing console-wide codepages is unnecessary and affects other users
-//! of the attached console. Pipes retain their ordinary byte I/O.
+//! only what this module changed on exit. Redirected stdout is untouched.
+//! Rust std provides console-aware Unicode I/O; the one codepage change is
+//! deliberate: ConPTY decodes the terminal's pasted input bytes per the
+//! client's input codepage, so on a host whose ANSI page is not UTF-8 (a
+//! Chinese Windows defaults to 936) a pasted CJK burst arrives as mojibake
+//! key records. Both codepages are pinned to UTF-8 for the process and
+//! handed back on restore. Pipes retain their ordinary byte I/O.
 //! The FFI uses pinned Win32 constants without a windows-sys dependency.
 
 /// The original output mode, used to restore only the VT bit we added.
@@ -10,6 +13,8 @@
 #[derive(Clone, Copy)]
 struct OriginalConsole {
     output_mode: u32,
+    input_cp: u32,
+    output_cp: u32,
 }
 
 #[cfg(windows)]
@@ -37,10 +42,10 @@ mod winapi {
         fn GetStdHandle(which: i32) -> Handle;
         fn GetConsoleMode(handle: Handle, mode: *mut u32) -> i32;
         fn SetConsoleMode(handle: Handle, mode: u32) -> i32;
-        #[cfg(test)]
         fn GetConsoleOutputCP() -> u32;
-        #[cfg(test)]
         fn GetConsoleCP() -> u32;
+        fn SetConsoleOutputCP(codepage: u32) -> i32;
+        fn SetConsoleCP(codepage: u32) -> i32;
     }
 
     /// The process's console output handle, null when none.
@@ -60,22 +65,33 @@ mod winapi {
         unsafe { SetConsoleMode(handle, mode) != 0 }
     }
 
-    #[cfg(test)]
     pub(crate) fn output_codepage() -> u32 {
         unsafe { GetConsoleOutputCP() }
     }
 
-    #[cfg(test)]
     pub(crate) fn input_codepage() -> u32 {
         unsafe { GetConsoleCP() }
     }
+
+    pub(crate) fn set_codepages(input_cp: u32, output_cp: u32) {
+        unsafe {
+            SetConsoleCP(input_cp);
+            SetConsoleOutputCP(output_cp);
+        }
+    }
+
+    /// `GetACP()`'s replacement the paste path needs: `wincon.h` has no
+    /// named constant for 65001.
+    pub(crate) const UTF8_CODEPAGE: u32 = 65001;
 
     pub(crate) const fn enable_vt() -> u32 {
         ENABLE_VIRTUAL_TERMINAL_PROCESSING
     }
 }
 
-/// Enable VT on attached stdout without changing console codepages.
+/// Enable VT on attached stdout and pin both console codepages to UTF-8
+/// (ConPTY decodes terminal input bytes per the client's input codepage; a
+/// non-UTF-8 page turns a pasted CJK burst into mojibake key records).
 /// Idempotent; a no-op for redirected stdout and non-Windows hosts.
 pub fn init() {
     #[cfg(windows)]
@@ -86,13 +102,16 @@ pub fn init() {
         };
         let _ = ORIGINAL.set(OriginalConsole {
             output_mode: original_mode,
+            input_cp: winapi::input_codepage(),
+            output_cp: winapi::output_codepage(),
         });
         let _ = winapi::set_output_mode(handle, original_mode | winapi::enable_vt());
+        winapi::set_codepages(winapi::UTF8_CODEPAGE, winapi::UTF8_CODEPAGE);
     }
 }
 
-/// Restore only the VT bit added by [`init`], preserving other mode bits.
-/// Best-effort; a no-op when no console was prepared.
+/// Restore the VT bit and codepages [`init`] changed, preserving other
+/// mode bits. Best-effort; a no-op when no console was prepared.
 pub fn restore() {
     #[cfg(windows)]
     {
@@ -109,6 +128,9 @@ pub fn restore() {
             // restores own stay untouched.
             let _ = winapi::set_output_mode(handle, current & !winapi::enable_vt());
         }
+        // Hand back the process-entry codepages (the UTF-8 pin [`init`]
+        // added for the ConPTY paste path).
+        winapi::set_codepages(original.input_cp, original.output_cp);
     }
 }
 
@@ -126,10 +148,10 @@ mod windows_tests {
         }
     }
 
-    /// Check VT setup/restore and that both console codepages stay intact.
-    /// CI may redirect stdout, in which case init must remain a no-op.
+    /// Check VT setup, the UTF-8 codepage pin, and the full restore. CI
+    /// may redirect stdout, in which case init must remain a no-op.
     #[test]
-    fn init_preserves_codepages_and_restores_vt() {
+    fn init_pins_utf8_codepages_and_restores_them_with_vt() {
         let handle = winapi::stdout_handle();
         let Some(original_mode) = winapi::output_mode(handle) else {
             // A redirected (non-console) stdout: the gate keeps the
@@ -150,8 +172,8 @@ mod windows_tests {
         let _console_restore = ConsoleRestoreOnPanic;
 
         init();
-        assert_eq!(winapi::output_codepage(), original_output_cp);
-        assert_eq!(winapi::input_codepage(), original_input_cp);
+        assert_eq!(winapi::output_codepage(), winapi::UTF8_CODEPAGE);
+        assert_eq!(winapi::input_codepage(), winapi::UTF8_CODEPAGE);
         let mode = winapi::output_mode(handle).expect("the console mode");
         assert_ne!(
             mode & winapi::enable_vt(),
