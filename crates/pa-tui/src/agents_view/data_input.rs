@@ -2,11 +2,12 @@
 //! reconciled roster+catalog with the query filter), the roster update apply, the saved-catalog
 //! stream reconcile, and the selection/key/mouse dispatch residue.
 use super::{
-    build_rows, compute_rollups, filter_empty_sessions, filter_unified_sessions,
-    parse_search_query, reconcile_unified_sessions, resolve_selection, scope_ancestors, scope_root,
-    scope_to_subtree, subtree_contains, AgentsViewMode, AgentsViewRow, AgentsViewScope, Composer,
-    OpenedRow, PathBuf, PressedMouseClick, RowKind, SavedMore, ScopeRoot, SelectionEdge,
-    SelectionKey, SessionSelection, Value, ANCHOR_LOADING_HINT, SAVED_CATALOG_PAGE_FILES,
+    build_rows, compute_rollups, filter_by_session_ids, filter_empty_sessions,
+    filter_unified_sessions, parse_search_query, reconcile_unified_sessions, resolve_selection,
+    scope_ancestors, scope_root, scope_to_subtree, subtree_contains, AgentsViewMode, AgentsViewRow,
+    AgentsViewScope, Composer, OpenedRow, PathBuf, PressedMouseClick, RowKind, SavedMore,
+    ScopeRoot, SelectionEdge, SelectionKey, SessionSelection, Value, ANCHOR_LOADING_HINT,
+    SAVED_CATALOG_PAGE_FILES,
 };
 
 impl AgentsViewMode {
@@ -61,6 +62,12 @@ impl AgentsViewMode {
         let filtered = filter_empty_sessions(working, &preserved);
         let filtered = if self.query.trim().is_empty() {
             filtered
+        } else if self.content_search.enabled {
+            // Until the first scan lands the list is empty and says it is searching.
+            self.content_search
+                .matches()
+                .map(|ids| filter_by_session_ids(&filtered, ids))
+                .unwrap_or_default()
         } else {
             let parsed = parse_search_query(self.query.trim());
             filter_unified_sessions(&filtered, &parsed)
@@ -417,6 +424,8 @@ impl AgentsViewMode {
     /// arrive out of order) never race a stale failure over a newer
     /// success.
     pub(super) fn query_changed(&mut self, was_empty: bool) {
+        self.content_search
+            .arm(self.query.trim(), tokio::time::Instant::now());
         self.saved_query_rearm = self.saved_fetch_failed;
         self.end_anchor_wait();
         if was_empty {
@@ -484,6 +493,9 @@ impl AgentsViewMode {
     /// dispatch order, so a user override moves both the handler and the hint — the same contract
     /// as the session view (#184).
     pub(super) fn handle_key(&mut self, key: &str) {
+        // Every key that reaches the view is handled, whichever surface consumes it (the
+        // force-quit guard counts the Ctrl+C presses; an exit re-arms it from the loop's break).
+        self.exit_guard.note_key_handled(key);
         // A sticky line clears on any keypress (the transient lines ride their own
         // expiry).
         self.clear_sticky_status();
@@ -518,12 +530,8 @@ impl AgentsViewMode {
             Composer::Search => {}
         }
         // `app.clear` (default ctrl+c): the first press arms the exit hint, a second press while
-        // armed exits. One handled Ctrl+C press: the force-quit guard disarms once the whole
-        // observed pair was handled; an exit re-arms from the run loop's break.
+        // armed exits.
         if self.keybindings.matches(key, "app.clear") {
-            if key == "ctrl+c" {
-                self.exit_guard.note_ctrl_c_handled();
-            }
             if was_armed {
                 self.running = false;
             } else {
@@ -540,6 +548,12 @@ impl AgentsViewMode {
             && self.keybindings.matches(key, "tui.select.cancel")
             && self.dismiss_incident_notice()
         {
+            return;
+        }
+        // `app.agents.searchContent` (default ctrl+f): switch the search between titles and
+        // message text; the typed query stays.
+        if self.keybindings.matches(key, "app.agents.searchContent") {
+            self.toggle_content_search();
             return;
         }
         // `app.agents.rename` (default ctrl+r, empty editor only, before the delete arm):

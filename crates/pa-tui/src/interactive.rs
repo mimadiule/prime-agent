@@ -39,14 +39,14 @@ use render::{
     TerminalHandoff,
 };
 
-mod reconnect;
+pub(crate) mod reconnect;
 
 use reconnect::{
-    arm_shutdown_recovery, ReconnectConnect, ReconnectLoop, SessionReconnect,
+    Connection, ConnectionEffect, ConnectionEvent, ReconnectConnect,
     SESSION_RECONNECT_ATTEMPT_TIMEOUT_S,
 };
 #[cfg(test)]
-use reconnect::{DAEMON_SHUTDOWN_RECONNECT_WINDOW, SHUTDOWN_RECONNECT_RETRY};
+use reconnect::{ReconnectLoop, DAEMON_SHUTDOWN_RECONNECT_WINDOW, SHUTDOWN_RECONNECT_RETRY};
 
 mod run;
 
@@ -284,7 +284,8 @@ pub trait InteractionTelemetry: Send + Sync {
         scoped: bool,
     ) -> Pin<Box<dyn Future<Output = ()> + Send + '_>>;
     /// An agents-view action ran (`tui agents action`): `action` is `program_shown` (the ctrl+o
-    /// toggle turned a spawn program on) or `renamed` — primitives only.
+    /// toggle turned a spawn program on), `renamed`, or `content_search` (ctrl+f switched the
+    /// search to message text) — primitives only.
     fn agents_view_action(
         &self,
         action: &'static str,
