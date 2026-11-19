@@ -900,13 +900,22 @@ impl AutocompleteProvider for CombinedAutocompleteProvider {
                     .and_then(|command| self.arguments.get(command))
                     .is_some_and(|items| items.iter().any(|argument| argument.value == item.value))
             {
-                return apply_file_completion(
-                    lines,
-                    cursor_line,
-                    cursor_col,
-                    item,
-                    &context.prefix,
-                );
+                // pr-4074's argument replacement expressed in pr-3980's typed tokens: the
+                // whole typed argument (ending at the cursor) is the token being replaced.
+                let line_chars = lines[cursor_line].chars().count();
+                let start = cursor_col
+                    .min(line_chars)
+                    .saturating_sub(context.prefix.chars().count());
+                let token = PathToken {
+                    start,
+                    end: cursor_col,
+                    text: context.prefix.clone(),
+                    at: false,
+                    path: context.prefix.clone(),
+                    quoting: Quoting::Bare,
+                    closed: false,
+                };
+                return apply_file_completion(lines, cursor_line, cursor_col, item, &token);
             }
         }
         let token = path_token::path_token_before(before);
