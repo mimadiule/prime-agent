@@ -144,8 +144,25 @@ where
         return Err(aborted_error());
     }
     tokio::select! {
-        value = operation => Ok(value),
+        // A cancellation the caller requested wins over a result that became
+        // ready in the same poll: the abort branch is polled first, and the
+        // result branch re-checks the signal through `consume_unless_aborted`.
+        biased;
         () = signal.aborted() => Err(aborted_error()),
+        value = operation => consume_unless_aborted(value, signal),
+    }
+}
+
+/// Consume an operation's result unless a cancellation is already requested.
+///
+/// The check reads the signal at the moment the result is consumed, not when
+/// the race started: a result that became ready in the same poll as the abort
+/// is not work the caller still wants, so it reports cancelled.
+fn consume_unless_aborted<T>(result: T, signal: &AbortSignal) -> anyhow::Result<T> {
+    if signal.is_aborted() {
+        Err(aborted_error())
+    } else {
+        Ok(result)
     }
 }
 
@@ -216,6 +233,33 @@ mod tests {
         let signal = AbortSignal::never();
         let value = race_with_abort(async { 7 }, &signal).await.unwrap();
         assert_eq!(value, 7);
+    }
+
+    #[test]
+    fn a_completed_result_reports_cancelled_once_the_abort_is_requested() {
+        // The result was ready before the caller consumed it, and the abort
+        // was requested before the caller consumed it: the cancelled outcome
+        // wins. One call, no poll order involved, so the assertion is exact.
+        let controller = AbortController::new();
+        let signal = controller.signal();
+        controller.abort();
+        let error = consume_unless_aborted(7, &signal).unwrap_err();
+        assert!(is_abort_error(&error));
+        // An un-aborted signal still delivers the result.
+        let live = AbortController::new();
+        assert_eq!(consume_unless_aborted(7, &live.signal()).unwrap(), 7);
+    }
+
+    #[tokio::test]
+    async fn an_already_fired_abort_beats_a_ready_result() {
+        // Both branches are ready before the first poll: the abort already
+        // fired and the operation resolves without yielding. The race must
+        // settle on the cancelled outcome, never on the ready value.
+        let controller = AbortController::new();
+        let signal = controller.signal();
+        controller.abort();
+        let result = race_with_abort(async { 7 }, &signal).await;
+        assert!(result.is_err(), "a fired abort must beat a ready result");
     }
 
     #[tokio::test]
