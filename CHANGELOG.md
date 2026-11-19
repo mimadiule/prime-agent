@@ -3,6 +3,15 @@
 Release notes for Prime Agent. Historical TypeScript release notes are
 recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prime-agent/blob/v0.9.8/packages/coding-agent/CHANGELOG.md).
 
+## [0.10.5-mimi.1] - 2026-11-19
+
+个人 fork 构建(基座:官方 v0.10.5)。官方 release 之外的变化:
+
+- 合入上游未收编的 PR:#3867(agents 视图 Ctrl+F 会话内容搜索)、#3183(实体 id 修饰符)、#3872(回合开始前落地的 abort 立即生效)。
+- mimi 专项保留:Windows 粘贴中文乱码修复 —— `console_init` 钉定 UTF-8 代码页(65001),`console_restore` 还原(`pa-types/src/platform/windows_console.rs`)。
+- fork 标识:TUI 标题栏显示 `v0.10.5-mimi.1`;`--version` 保持 `0.10.5`(livecheck 门禁)。
+- 相对 0.10.3-mimi.1:#3825 已随官方 v0.10.5 收编,不再手工维护;#3792(customMessage 拒投)在上游重写注入路径后冲突,放弃携带(详见 MIMI-BUILD.md);#3847(内核驻留)维持放弃。
+
 ## [0.10.5] - 2026-11-18
 
 - Daemon, print/JSON (`prime-agent -p`), and RPC stdio-mode refinements now write the harness stores the session's digest reads: the global store under the agent dir's `harness/` path and the local store in the session's own artifact directory, instead of the orphan `~/.prime/agent/harness_state.json` and `~/.prime/agent/refinement_history.jsonl` (written by daemon and RPC `/refine --global`), one shared `~/.prime/agent/sessions/harness/harness_state.json` (written by every session whose session dir is the sessions root), and `<session dir>/harness/harness_state.json` under any custom session dir (`--session-dir`, `PRIME_AGENT_SESSION_DIR`, or the `sessionDir` setting). The old files stay on disk but nothing reads them anymore. No automatic migration ships: entries in the orphaned global file can be merged by hand into `~/.prime/agent/harness/harness_state.json`; the shared local files mix sessions and cannot be attributed back.
