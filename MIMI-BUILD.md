@@ -81,3 +81,14 @@
 - 合入(3):#3867 #3183 #3872
 - 放弃:#3792(注入路径重写+held_run_end,见上);#3847(维持)
 - mimi 重放:ConPTY 修复(79a468d78 整文件)+ chrome.rs `v0.10.5-mimi.1` + 三处文档
+
+### 0.10.5-mimi.2(2026-11-19,基座 v0.10.5 = 033eea170,mimi.1 之上追加)
+- open PR 全量筛选(38 个)后按档级实合 8 个:#4097(bash 高亮)· #4074(答案抢救)·
+  #4102(取消必胜 biased)· #4042(幽灵用户行)· #3977+#3980(@引号路径,stacked 树整体)·
+  #4061(费用只增不减)· #3893(原生滚动转录)
+- 合并方式:trial 分支逐 PR merge --squash;#3980 单树带 #3977;#4097 首败网络抖动重试即过
+- #4042 冲突解法(2 文件):admission.rs 保 HEAD 只采纳新注释;turn_stream_tests.rs
+  保 HEAD 追加新测试 an_abort_after_admission_keeps_the_admitted_user_row
+- 风险记录:#4061(102 文件)#3893(+2926 行)无本地 Rust 无法预验编译,
+  若 Actions 编译失败按 #3847 先例弃该 PR 重跑
+- fork 标识:TUI 标题栏 `v0.10.5-mimi.2`;--version 仍 0.10.5

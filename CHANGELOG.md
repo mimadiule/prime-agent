@@ -3,6 +3,18 @@
 Release notes for Prime Agent. Historical TypeScript release notes are
 recorded in the [TypeScript changelog](https://github.com/PrimeIntellect-ai/prime-agent/blob/v0.9.8/packages/coding-agent/CHANGELOG.md).
 
+## [0.10.5-mimi.2] - 2026-11-19
+
+在 0.10.5-mimi.1 基础上追加合入 8 个上游 open PR:
+
+- #4097:bash 代码块语法高亮(工具卡片内 bash 命令着色)。
+- #4074:子代理答案抢救 —— worker 意外死亡时,已产出的最终答案不再丢失。
+- #4102:取消必胜 —— abort 与任务启动竞态时 abort 一侧必胜(`biased;`)。
+- #4042:幽灵用户行修复 —— 准入前的用户消息不再持久化;附带 abort-after-admission 行为测试。
+- #3977 + #3980:`@` 引号路径支持与 `@` 语法统一(叠合树整体合入)。
+- #4061:费用统计只增不减 —— supervisor 独占费用记账,消除多写者漂移。
+- #3893:TUI 转录进终端原生滚动缓冲(`terminal.scrollbackFlush`),tmux copy mode 可用。
+
 ## [0.10.5-mimi.1] - 2026-11-19
 
 个人 fork 构建(基座:官方 v0.10.5)。官方 release 之外的变化:

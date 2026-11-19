@@ -28,10 +28,11 @@ Prime Agent: A Self-Improving RLM Harness
 </p>
 
 > [!NOTE]
-> **mimi 自用构建(0.10.5-mimi.1,非官方)** —— 本分支基于官方 v0.10.5,另合入
-> 3 个官方未收编的 PR:#3867 · #3183 · #3872;并保留 mimi 专项修复
-> (Windows 粘贴中文 UTF-8,ConPTY 代码页钉定)。
-> TUI 标题栏显示 `v0.10.5-mimi.1`,可与官方版一眼区分(`--version` 受 CI 门禁保持 `0.10.5`)。
+> **mimi 自用构建(0.10.5-mimi.2,非官方)** —— 本分支基于官方 v0.10.5,另合入
+> 11 个官方未收编的 PR:#3867 · #3183 · #3872 · #4097(bash 高亮)· #4074(子代理答案抢救)·
+> #4102(取消必胜)· #4042(幽灵用户行)· #3977+#3980(@引号路径)· #4061(费用只增不减)·
+> #3893(转录进原生滚动);并保留 mimi 专项修复(Windows 粘贴中文 UTF-8,ConPTY 代码页钉定)。
+> TUI 标题栏显示 `v0.10.5-mimi.2`,可与官方版一眼区分(`--version` 受 CI 门禁保持 `0.10.5`)。
 > 明细见 [CHANGELOG.md](CHANGELOG.md);重建步骤见 [MIMI-BUILD.md](MIMI-BUILD.md)。
 
 <p align="center">
